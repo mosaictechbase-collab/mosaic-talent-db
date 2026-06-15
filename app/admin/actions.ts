@@ -222,3 +222,101 @@ export async function importProfiles(formData: FormData): Promise<ImportResult> 
 
   return { inserted, updated, skipped: skippedWithinBatch, errors, batchId }
 }
+
+export interface ManualProfileInput {
+  full_name: string
+  email: string
+  organizations: string
+  roles: string
+  skills: string
+  interests: string
+  graduation_year: string
+  major: string
+  location: string
+  bio: string
+  linkedin_url: string
+}
+
+export async function addProfile(input: ManualProfileInput): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+
+  const split = (s: string) =>
+    s.split(',').map((v) => v.trim()).filter(Boolean)
+
+  const { error } = await supabase.from('profiles').insert({
+    full_name: input.full_name.trim(),
+    email: input.email.trim().toLowerCase() || null,
+    organizations: split(input.organizations),
+    roles: split(input.roles),
+    skills: split(input.skills),
+    interests: split(input.interests),
+    graduation_year: normalizeGradYear(input.graduation_year),
+    major: input.major.trim() || null,
+    location: input.location.trim() || null,
+    bio: input.bio.trim() || null,
+    linkedin_url: input.linkedin_url.trim() || null,
+    is_active: true,
+  })
+
+  return error ? { error: error.message } : {}
+}
+
+export async function updateProfile(id: string, input: ManualProfileInput): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+
+  const split = (s: string) =>
+    s.split(',').map((v) => v.trim()).filter(Boolean)
+
+  const { error } = await supabase.from('profiles').update({
+    full_name: input.full_name.trim(),
+    email: input.email.trim().toLowerCase() || null,
+    organizations: split(input.organizations),
+    roles: split(input.roles),
+    skills: split(input.skills),
+    interests: split(input.interests),
+    graduation_year: normalizeGradYear(input.graduation_year),
+    major: input.major.trim() || null,
+    location: input.location.trim() || null,
+    bio: input.bio.trim() || null,
+    linkedin_url: input.linkedin_url.trim() || null,
+  }).eq('id', id)
+
+  return error ? { error: error.message } : {}
+}
+
+export async function deleteProfile(id: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const { error } = await supabase.from('profiles').delete().eq('id', id)
+  return error ? { error: error.message } : {}
+}
+
+export async function listProfiles(page = 1, q = ''): Promise<{
+  profiles: {
+    id: string; full_name: string; email: string | null
+    organizations: string[]; roles: string[]; skills: string[]; interests: string[]
+    graduation_year: number | null; major: string | null; location: string | null
+    bio: string | null; linkedin_url: string | null
+  }[]
+  total: number
+}> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const pageSize = 50
+  const offset = (page - 1) * pageSize
+
+  let query = supabase
+    .from('profiles')
+    .select('id, full_name, email, organizations, roles, skills, interests, graduation_year, major, location, bio, linkedin_url', { count: 'exact' })
+    .order('full_name')
+    .range(offset, offset + pageSize - 1)
+
+  if (q.trim()) {
+    query = query.ilike('full_name', `%${q.trim()}%`)
+  }
+
+  const { data, count } = await query
+  return { profiles: data ?? [], total: count ?? 0 }
+}
