@@ -19,6 +19,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-6">
+      <h1 className="text-2xl font-bold text-gray-900 mb-5">Explore Community</h1>
       {/* Top search bar */}
       <div className="mb-6">
         <Suspense>
