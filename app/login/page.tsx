@@ -23,8 +23,12 @@ function LoginForm() {
     setError(null)
 
     const supabase = createClient()
-    // No emailRedirectTo = Supabase sends a 6-digit code instead of a link
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `https://mosaic-talent-datab.vercel.app/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+      },
+    })
 
     if (error) {
       setError(error.message)
