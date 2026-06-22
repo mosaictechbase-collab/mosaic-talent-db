@@ -45,7 +45,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
               <p className="text-sm mt-1">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.profiles.map((profile) => (
                 <ProfileCard key={profile.id} profile={profile} />
               ))}
