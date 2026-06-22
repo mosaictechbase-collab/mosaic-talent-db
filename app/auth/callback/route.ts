@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      return NextResponse.redirect(`${origin}${redirectTo}`)
+      return NextResponse.redirect(`https://mosaic-talent-datab.vercel.app${redirectTo}`)
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+  return NextResponse.redirect(`https://mosaic-talent-datab.vercel.app/login?error=auth_failed`)
 }
