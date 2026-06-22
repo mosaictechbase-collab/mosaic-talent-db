@@ -2,22 +2,20 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
 function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') ?? '/admin'
-  const router = useRouter()
 
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSendCode(e: React.FormEvent) {
+  async function handleSend(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -38,26 +36,6 @@ function LoginForm() {
     setLoading(false)
   }
 
-  async function handleVerifyCode(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    const supabase = createClient()
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: code.trim(),
-      type: 'email',
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      router.push(redirectTo)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -70,7 +48,7 @@ function LoginForm() {
           <>
             <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">Admin Sign In</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
-              Enter your approved admin email to receive a one-time code.
+              Enter your approved admin email to receive a sign-in link.
             </p>
 
             {error && (
@@ -79,7 +57,7 @@ function LoginForm() {
               </div>
             )}
 
-            <form onSubmit={handleSendCode} className="space-y-4">
+            <form onSubmit={handleSend} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email address
@@ -99,7 +77,7 @@ function LoginForm() {
                 disabled={loading}
                 className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Sending…' : 'Send Code'}
+                {loading ? 'Sending…' : 'Send Sign-In Link'}
               </button>
             </form>
 
@@ -116,45 +94,14 @@ function LoginForm() {
             </div>
             <h1 className="text-xl font-semibold text-gray-900 mb-1 text-center">Check your email</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
-              We sent a 6-digit code to <strong>{email}</strong>.
+              We sent a sign-in link to <strong>{email}</strong>. Click the link to access the admin panel.
             </p>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleVerifyCode} className="space-y-4">
-              <div>
-                <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                  6-digit code
-                </label>
-                <input
-                  id="code"
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  required
-                  autoFocus
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="000000"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || code.length !== 6}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Verifying…' : 'Sign In'}
-              </button>
-            </form>
-
+            <p className="text-xs text-gray-400 text-center">
+              The link expires in 1 hour. Check your spam folder if you don't see it.
+            </p>
             <button
-              onClick={() => { setSent(false); setCode(''); setError(null) }}
-              className="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700"
+              onClick={() => { setSent(false); setError(null) }}
+              className="mt-6 w-full text-center text-sm text-gray-500 hover:text-gray-700"
             >
               Use a different email
             </button>
