@@ -22,13 +22,7 @@ function LoginForm() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: `https://mosaic-talent-datab.vercel.app/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
-      },
-    })
+    const { error } = await supabase.auth.signInWithOtp({ email })
 
     if (error) {
       setError(error.message)
@@ -44,7 +38,7 @@ function LoginForm() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
       type: 'email',
@@ -53,8 +47,14 @@ function LoginForm() {
     if (error) {
       setError(error.message)
       setLoading(false)
-    } else {
+      return
+    }
+
+    if (data.session) {
       window.location.href = redirectTo
+    } else {
+      setError('No session returned. Please try again.')
+      setLoading(false)
     }
   }
 
@@ -116,7 +116,7 @@ function LoginForm() {
             </div>
             <h1 className="text-xl font-semibold text-gray-900 mb-1 text-center">Check your email</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
-              We sent a sign-in code to <strong>{email}</strong>.
+              We sent a sign-in code to <strong>{email}</strong>. Enter it below.
             </p>
 
             {error && (
@@ -137,14 +137,14 @@ function LoginForm() {
                   required
                   autoFocus
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => setCode(e.target.value.trim())}
                   placeholder="000000"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <button
                 type="submit"
-                disabled={loading || code.length < 6}
+                disabled={loading || code.length < 1}
                 className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Verifying…' : 'Sign In'}
