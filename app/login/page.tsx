@@ -24,7 +24,10 @@ function LoginForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false },
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `https://mosaic-talent-datab.vercel.app/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+      },
     })
 
     if (error) {
