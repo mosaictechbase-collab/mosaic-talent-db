@@ -234,6 +234,7 @@ export interface ManualProfileInput {
   major: string
   location: string
   bio: string
+  current_project: string
   linkedin_url: string
 }
 
@@ -255,6 +256,7 @@ export async function addProfile(input: ManualProfileInput): Promise<{ error?: s
     major: input.major.trim() || null,
     location: input.location.trim() || null,
     bio: input.bio.trim() || null,
+    current_project: input.current_project.trim() || null,
     linkedin_url: input.linkedin_url.trim() || null,
     is_active: true,
   })
@@ -280,6 +282,7 @@ export async function updateProfile(id: string, input: ManualProfileInput): Prom
     major: input.major.trim() || null,
     location: input.location.trim() || null,
     bio: input.bio.trim() || null,
+    current_project: input.current_project.trim() || null,
     linkedin_url: input.linkedin_url.trim() || null,
   }).eq('id', id)
 
@@ -309,7 +312,7 @@ export async function listProfiles(page = 1, q = ''): Promise<{
 
   let query = supabase
     .from('profiles')
-    .select('id, full_name, email, organizations, roles, skills, interests, graduation_year, major, location, bio, linkedin_url', { count: 'exact' })
+    .select('id, full_name, email, organizations, roles, skills, interests, graduation_year, major, location, bio, current_project, linkedin_url', { count: 'exact' })
     .order('full_name')
     .range(offset, offset + pageSize - 1)
 

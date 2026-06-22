@@ -6,7 +6,7 @@ import { addProfile, type ManualProfileInput } from '@/app/admin/actions'
 const empty: ManualProfileInput = {
   full_name: '', email: '', organizations: '', roles: '',
   skills: '', interests: '', graduation_year: '', major: '',
-  location: '', bio: '', linkedin_url: '',
+  location: '', bio: '', current_project: '', linkedin_url: '',
 }
 
 interface Props {
@@ -88,6 +88,7 @@ export default function ManualAddForm({ onAdded }: Props) {
         {field('Major', 'major', 'Computer Science')}
         {field('Location', 'location', 'Boston, MA')}
         {field('LinkedIn URL', 'linkedin_url', 'https://linkedin.com/in/...')}
+        {field('Currently Working On', 'current_project', 'Building a fintech app...')}
       </div>
 
       <div>

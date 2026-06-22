@@ -13,6 +13,7 @@ export interface Profile {
   linkedin_url: string | null
   website_url: string | null
   bio: string | null
+  current_project: string | null
   is_active: boolean
   import_batch_id: string | null
   created_at: string

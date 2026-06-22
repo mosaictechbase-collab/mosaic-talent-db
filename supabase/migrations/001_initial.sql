@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   linkedin_url     text,
   website_url      text,
   bio              text,
+  current_project  text,
   is_active        boolean DEFAULT true,
   import_batch_id  uuid REFERENCES import_batches(id) ON DELETE SET NULL,
   created_at       timestamptz DEFAULT now(),

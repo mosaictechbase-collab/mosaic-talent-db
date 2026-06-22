@@ -13,7 +13,7 @@ export async function searchProfiles(params: SearchParams): Promise<SearchResult
   let query = supabase
     .from('profiles')
     .select(
-      'id, full_name, email, graduation_year, organizations, roles, skills, interests, location, bio, linkedin_url, website_url, is_active',
+      'id, full_name, email, graduation_year, organizations, roles, skills, interests, location, bio, current_project, linkedin_url, website_url, is_active',
       { count: 'exact' }
     )
     .eq('is_active', true)

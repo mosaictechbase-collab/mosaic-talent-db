@@ -59,6 +59,14 @@ export default function ProfileCard({ profile }: Props) {
         </div>
       )}
 
+      {/* Currently working on */}
+      {profile.current_project && (
+        <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+          <p className="text-xs font-medium text-amber-700 mb-0.5">Currently working on</p>
+          <p className="text-xs text-amber-800 line-clamp-2">{profile.current_project}</p>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
         {profile.interests.length > 0 ? (

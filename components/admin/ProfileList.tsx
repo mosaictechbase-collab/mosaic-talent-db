@@ -15,6 +15,7 @@ interface ProfileRow {
   major: string | null
   location: string | null
   bio: string | null
+  current_project: string | null
   linkedin_url: string | null
 }
 
@@ -25,7 +26,7 @@ interface Props {
 const empty: ManualProfileInput = {
   full_name: '', email: '', organizations: '', roles: '',
   skills: '', interests: '', graduation_year: '', major: '',
-  location: '', bio: '', linkedin_url: '',
+  location: '', bio: '', current_project: '', linkedin_url: '',
 }
 
 function toInput(p: ProfileRow): ManualProfileInput {
@@ -40,6 +41,7 @@ function toInput(p: ProfileRow): ManualProfileInput {
     major: p.major ?? '',
     location: p.location ?? '',
     bio: p.bio ?? '',
+    current_project: p.current_project ?? '',
     linkedin_url: p.linkedin_url ?? '',
   }
 }
@@ -230,6 +232,7 @@ export default function ProfileList({ refreshKey }: Props) {
                   ['Major', 'major', 'Computer Science', '', false],
                   ['Location', 'location', 'Boston, MA', '', false],
                   ['LinkedIn URL', 'linkedin_url', 'https://linkedin.com/in/...', '', false],
+                  ['Currently Working On', 'current_project', 'Building a fintech app...', '', false],
                 ] as [string, keyof ManualProfileInput, string, string, boolean][]).map(([label, key, placeholder, hint, required]) => (
                   <div key={key}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
