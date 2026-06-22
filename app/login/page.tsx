@@ -11,51 +11,25 @@ function LoginForm() {
   const redirectTo = searchParams.get('redirectTo') ?? '/admin'
 
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSend(e: React.FormEvent) {
+  async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError(error.message)
-    } else {
-      setSent(true)
-    }
-    setLoading(false)
-  }
-
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token: code.trim(),
-      type: 'email',
-    })
-
-    if (error) {
-      setError(error.message)
+      setError('Invalid email or password.')
       setLoading(false)
       return
     }
 
-    if (data.session) {
-      window.location.href = redirectTo
-    } else {
-      setError('No session returned. Please try again.')
-      setLoading(false)
-    }
+    window.location.href = redirectTo
   }
 
   return (
@@ -66,99 +40,54 @@ function LoginForm() {
           <span className="font-semibold text-gray-800 text-xl"> Talent Network</span>
         </Link>
 
-        {!sent ? (
-          <>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">Admin Sign In</h1>
-            <p className="text-gray-500 text-sm text-center mb-6">
-              Enter your approved admin email to receive a sign-in code.
-            </p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">Admin Sign In</h1>
+        <p className="text-gray-500 text-sm text-center mb-6">
+          Access is restricted to approved admin accounts.
+        </p>
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSend} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@northeastern.edu"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Sending…' : 'Send Code'}
-              </button>
-            </form>
-
-            <p className="mt-6 text-center text-xs text-gray-400">
-              Access is restricted to approved admin emails only.
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-semibold text-gray-900 mb-1 text-center">Check your email</h1>
-            <p className="text-gray-500 text-sm text-center mb-6">
-              We sent a sign-in code to <strong>{email}</strong>. Enter it below.
-            </p>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleVerify} className="space-y-4">
-              <div>
-                <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-                  Sign-in code
-                </label>
-                <input
-                  id="code"
-                  type="text"
-                  inputMode="numeric"
-                  required
-                  autoFocus
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.trim())}
-                  placeholder="000000"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || code.length < 1}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Verifying…' : 'Sign In'}
-              </button>
-            </form>
-
-            <button
-              onClick={() => { setSent(false); setCode(''); setError(null) }}
-              className="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              Use a different email
-            </button>
-          </>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
         )}
+
+        <form onSubmit={handleSignIn} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@northeastern.edu"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Signing in…' : 'Sign In'}
+          </button>
+        </form>
       </div>
     </div>
   )
