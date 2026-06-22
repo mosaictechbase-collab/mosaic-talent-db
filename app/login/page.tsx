@@ -11,6 +11,7 @@ function LoginForm() {
   const redirectTo = searchParams.get('redirectTo') ?? '/admin'
 
   const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,9 +24,7 @@ function LoginForm() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `https://mosaic-talent-datab.vercel.app/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
-      },
+      options: { shouldCreateUser: false },
     })
 
     if (error) {
@@ -34,6 +33,26 @@ function LoginForm() {
       setSent(true)
     }
     setLoading(false)
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: 'email',
+    })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+    } else {
+      window.location.href = redirectTo
+    }
   }
 
   return (
@@ -48,7 +67,7 @@ function LoginForm() {
           <>
             <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">Admin Sign In</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
-              Enter your approved admin email to receive a sign-in link.
+              Enter your approved admin email to receive a sign-in code.
             </p>
 
             {error && (
@@ -77,7 +96,7 @@ function LoginForm() {
                 disabled={loading}
                 className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Sending…' : 'Send Sign-In Link'}
+                {loading ? 'Sending…' : 'Send Code'}
               </button>
             </form>
 
@@ -94,14 +113,44 @@ function LoginForm() {
             </div>
             <h1 className="text-xl font-semibold text-gray-900 mb-1 text-center">Check your email</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
-              We sent a sign-in link to <strong>{email}</strong>. Click the link to access the admin panel.
+              We sent a sign-in code to <strong>{email}</strong>.
             </p>
-            <p className="text-xs text-gray-400 text-center">
-              The link expires in 1 hour. Check your spam folder if you don't see it.
-            </p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div>
+                <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+                  Sign-in code
+                </label>
+                <input
+                  id="code"
+                  type="text"
+                  inputMode="numeric"
+                  required
+                  autoFocus
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="000000"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading || code.length < 6}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Verifying…' : 'Sign In'}
+              </button>
+            </form>
+
             <button
-              onClick={() => { setSent(false); setError(null) }}
-              className="mt-6 w-full text-center text-sm text-gray-500 hover:text-gray-700"
+              onClick={() => { setSent(false); setCode(''); setError(null) }}
+              className="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700"
             >
               Use a different email
             </button>
