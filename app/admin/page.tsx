@@ -6,10 +6,11 @@ import ImportResultPanel from '@/components/admin/ImportResult'
 import ManualAddForm from '@/components/admin/ManualAddForm'
 import ProfileList from '@/components/admin/ProfileList'
 import EditRequests from '@/components/admin/EditRequests'
+import Analytics from '@/components/admin/Analytics'
 import { importProfiles } from './actions'
 import type { ImportResult } from '@/lib/types'
 
-type Tab = 'upload' | 'add' | 'manage' | 'requests'
+type Tab = 'upload' | 'add' | 'manage' | 'requests' | 'analytics'
 
 const PHASES = [
   { label: 'Parsing file', weight: 0.05 },
@@ -129,6 +130,7 @@ export default function AdminPage() {
     { id: 'add', label: 'Add Manually' },
     { id: 'manage', label: 'Manage Profiles' },
     { id: 'requests', label: 'Edit Requests' },
+    { id: 'analytics', label: 'Analytics' },
   ]
 
   return (
@@ -270,6 +272,14 @@ export default function AdminPage() {
         <div>
           <h2 className="text-base font-semibold text-gray-900 mb-4">Edit Requests</h2>
           <EditRequests />
+        </div>
+      )}
+
+      {/* Analytics tab */}
+      {tab === 'analytics' && (
+        <div>
+          <h2 className="text-base font-semibold text-gray-900 mb-6">Analytics</h2>
+          <Analytics />
         </div>
       )}
     </div>

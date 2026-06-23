@@ -353,3 +353,41 @@ export async function dismissEditRequest(id: string): Promise<{ error?: string }
   const { error } = await supabase.from('edit_requests').update({ status: 'reviewed' }).eq('id', id)
   return error ? { error: error.message } : {}
 }
+
+export async function listImportBatches(page = 1): Promise<{
+  batches: {
+    id: string
+    filename: string | null
+    imported_at: string
+    row_count: number
+    inserted_count: number
+    updated_count: number
+    dupes_skipped: number
+    imported_by: string | null
+  }[]
+  total: number
+  totalProfiles: number
+}> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const pageSize = 20
+  const offset = (page - 1) * pageSize
+
+  const [batchRes, countRes] = await Promise.all([
+    supabase
+      .from('import_batches')
+      .select('*', { count: 'exact' })
+      .order('imported_at', { ascending: false })
+      .range(offset, offset + pageSize - 1),
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true),
+  ])
+
+  return {
+    batches: (batchRes.data ?? []) as any,
+    total: batchRes.count ?? 0,
+    totalProfiles: countRes.count ?? 0,
+  }
+}
