@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import UploadBox from '@/components/admin/UploadBox'
 import ImportResultPanel from '@/components/admin/ImportResult'
 import ManualAddForm from '@/components/admin/ManualAddForm'
@@ -11,6 +11,67 @@ import type { ImportResult } from '@/lib/types'
 
 type Tab = 'upload' | 'add' | 'manage' | 'requests'
 
+const PHASES = [
+  { label: 'Parsing file', weight: 0.05 },
+  { label: 'Deduplicating rows', weight: 0.05 },
+  { label: 'AI enrichment', weight: 0.70 },
+  { label: 'Saving to database', weight: 0.20 },
+]
+
+function estimateDuration(rowCount: number): number {
+  // AI enrichment: BATCH_SIZE=50, MAX_CONCURRENT=5 → 250 rows/round, ~4s/round
+  const aiRounds = Math.ceil(rowCount / 250)
+  const aiSeconds = aiRounds * 4
+  const dbSeconds = Math.ceil(rowCount / 500) * 1.5
+  return Math.max(10, aiSeconds + dbSeconds + 3)
+}
+
+function countCSVRows(text: string): number {
+  return text.split('\n').filter((l) => l.trim().length > 0).length - 1
+}
+
+function useImportProgress(loading: boolean, estimatedSeconds: number) {
+  const [progress, setProgress] = useState(0)
+  const [phaseIndex, setPhaseIndex] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (!loading) {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      setProgress(0)
+      setPhaseIndex(0)
+      return
+    }
+
+    const totalMs = estimatedSeconds * 1000
+    const tickMs = 200
+    const totalTicks = totalMs / tickMs
+
+    // Build per-tick phase boundaries
+    const boundaries = PHASES.reduce<number[]>((acc, p) => {
+      acc.push((acc[acc.length - 1] ?? 0) + p.weight)
+      return acc
+    }, [])
+
+    let tick = 0
+    intervalRef.current = setInterval(() => {
+      tick++
+      // Advance to 90% linearly, leave last 10% for actual completion
+      const raw = Math.min(tick / totalTicks, 1)
+      const pct = raw * 90
+      setProgress(pct)
+
+      const fraction = pct / 90
+      const phase = boundaries.findIndex((b) => fraction < b)
+      setPhaseIndex(phase === -1 ? PHASES.length - 1 : phase)
+    }, tickMs)
+
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+  }, [loading, estimatedSeconds])
+
+  return { progress, phaseLabel: PHASES[phaseIndex]?.label ?? '' }
+}
+
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>('upload')
   const [file, setFile] = useState<File | null>(null)
@@ -18,6 +79,32 @@ export default function AdminPage() {
   const [result, setResult] = useState<ImportResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [rowCount, setRowCount] = useState(0)
+  const [displayProgress, setDisplayProgress] = useState(0)
+
+  const estimated = estimateDuration(rowCount)
+  const { progress, phaseLabel } = useImportProgress(loading, estimated)
+
+  // Smoothly jump to 100% on completion
+  useEffect(() => {
+    if (!loading && result) {
+      setDisplayProgress(100)
+      const t = setTimeout(() => setDisplayProgress(0), 1500)
+      return () => clearTimeout(t)
+    }
+    setDisplayProgress(progress)
+  }, [loading, result, progress])
+
+  async function handleFileSelect(f: File) {
+    setFile(f)
+    setResult(null)
+    setError(null)
+    setRowCount(0)
+    if (f.name.endsWith('.csv')) {
+      const text = await f.text()
+      setRowCount(countCSVRows(text))
+    }
+  }
 
   async function handleImport() {
     if (!file) return
@@ -72,7 +159,7 @@ export default function AdminPage() {
       {tab === 'upload' && (
         <div>
           <UploadBox
-            onFile={(f) => { setFile(f); setResult(null); setError(null) }}
+            onFile={handleFileSelect}
             disabled={loading}
           />
 
@@ -94,6 +181,33 @@ export default function AdminPage() {
               >
                 {loading ? 'Importing…' : 'Import'}
               </button>
+            </div>
+          )}
+
+          {/* Progress bar */}
+          {(loading || (displayProgress > 0 && displayProgress < 100) || (displayProgress === 100 && result)) && (
+            <div className="mt-4 border border-blue-100 bg-blue-50 rounded-xl px-5 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-blue-700">
+                  {loading ? phaseLabel : 'Complete'}
+                </span>
+                <span className="text-xs text-blue-500 tabular-nums">
+                  {loading
+                    ? `~${Math.max(1, Math.round(estimated - (displayProgress / 90) * estimated))}s remaining`
+                    : 'Done'}
+                </span>
+              </div>
+              <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-200 ease-linear"
+                  style={{ width: `${displayProgress}%` }}
+                />
+              </div>
+              {loading && rowCount > 0 && (
+                <p className="text-xs text-blue-400 mt-2">
+                  Processing {rowCount.toLocaleString()} rows · est. {Math.round(estimated)}s total
+                </p>
+              )}
             </div>
           )}
 
