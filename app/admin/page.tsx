@@ -5,10 +5,11 @@ import UploadBox from '@/components/admin/UploadBox'
 import ImportResultPanel from '@/components/admin/ImportResult'
 import ManualAddForm from '@/components/admin/ManualAddForm'
 import ProfileList from '@/components/admin/ProfileList'
+import EditRequests from '@/components/admin/EditRequests'
 import { importProfiles } from './actions'
 import type { ImportResult } from '@/lib/types'
 
-type Tab = 'upload' | 'add' | 'manage'
+type Tab = 'upload' | 'add' | 'manage' | 'requests'
 
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>('upload')
@@ -40,6 +41,7 @@ export default function AdminPage() {
     { id: 'upload', label: 'Upload CSV / Excel' },
     { id: 'add', label: 'Add Manually' },
     { id: 'manage', label: 'Manage Profiles' },
+    { id: 'requests', label: 'Edit Requests' },
   ]
 
   return (
@@ -146,6 +148,14 @@ export default function AdminPage() {
         <div>
           <h2 className="text-base font-semibold text-gray-900 mb-4">All profiles</h2>
           <ProfileList refreshKey={refreshKey} />
+        </div>
+      )}
+
+      {/* Edit requests tab */}
+      {tab === 'requests' && (
+        <div>
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Edit Requests</h2>
+          <EditRequests />
         </div>
       )}
     </div>

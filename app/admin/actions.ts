@@ -323,3 +323,33 @@ export async function listProfiles(page = 1, q = ''): Promise<{
   const { data, count } = await query
   return { profiles: data ?? [], total: count ?? 0 }
 }
+
+export async function listEditRequests(page = 1): Promise<{
+  requests: {
+    id: string
+    email: string
+    message: string
+    status: string
+    created_at: string
+    profile: { full_name: string } | null
+  }[]
+  total: number
+}> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const pageSize = 50
+  const offset = (page - 1) * pageSize
+  const { data, count } = await supabase
+    .from('edit_requests')
+    .select('id, email, message, status, created_at, profile:profile_id(full_name)', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(offset, offset + pageSize - 1)
+  return { requests: (data ?? []) as any, total: count ?? 0 }
+}
+
+export async function dismissEditRequest(id: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const { error } = await supabase.from('edit_requests').update({ status: 'reviewed' }).eq('id', id)
+  return error ? { error: error.message } : {}
+}
