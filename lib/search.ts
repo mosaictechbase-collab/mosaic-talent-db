@@ -50,6 +50,19 @@ export async function searchProfiles(params: SearchParams): Promise<SearchResult
   }
 }
 
+export const getProfileCount = unstable_cache(
+  async (): Promise<number> => {
+    const supabase = createServiceClient()
+    const { count } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+    return count ?? 0
+  },
+  ['profile-count'],
+  { revalidate: 300 } // refresh every 5 min
+)
+
 // Uses service role client (no cookies) so unstable_cache works correctly.
 // Filter options change only when profiles are imported — 1 hour TTL is fine.
 export const getFilterOptions = unstable_cache(
