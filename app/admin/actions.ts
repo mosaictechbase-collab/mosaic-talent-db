@@ -238,14 +238,31 @@ export interface ManualProfileInput {
   linkedin_url: string
 }
 
+async function logAudit(
+  supabase: ReturnType<typeof createServiceClient>,
+  action: 'add' | 'update' | 'delete',
+  performedBy: string,
+  profileId: string | null,
+  profileName: string,
+  metadata?: Record<string, unknown>
+) {
+  await supabase.from('audit_log').insert({
+    action,
+    profile_id: profileId,
+    profile_name: profileName,
+    performed_by: performedBy,
+    metadata: metadata ?? null,
+  })
+}
+
 export async function addProfile(input: ManualProfileInput): Promise<{ error?: string }> {
-  await requireAdmin()
+  const adminEmail = await requireAdmin()
   const supabase = createServiceClient()
 
   const split = (s: string) =>
     s.split(',').map((v) => v.trim()).filter(Boolean)
 
-  const { error } = await supabase.from('profiles').insert({
+  const { data, error } = await supabase.from('profiles').insert({
     full_name: input.full_name.trim(),
     email: input.email.trim().toLowerCase() || null,
     organizations: split(input.organizations),
@@ -259,13 +276,15 @@ export async function addProfile(input: ManualProfileInput): Promise<{ error?: s
     current_project: input.current_project.trim() || null,
     linkedin_url: input.linkedin_url.trim() || null,
     is_active: true,
-  })
+  }).select('id').single()
 
-  return error ? { error: error.message } : {}
+  if (error) return { error: error.message }
+  await logAudit(supabase, 'add', adminEmail, data?.id ?? null, input.full_name.trim())
+  return {}
 }
 
 export async function updateProfile(id: string, input: ManualProfileInput): Promise<{ error?: string }> {
-  await requireAdmin()
+  const adminEmail = await requireAdmin()
   const supabase = createServiceClient()
 
   const split = (s: string) =>
@@ -286,14 +305,27 @@ export async function updateProfile(id: string, input: ManualProfileInput): Prom
     linkedin_url: input.linkedin_url.trim() || null,
   }).eq('id', id)
 
-  return error ? { error: error.message } : {}
+  if (error) return { error: error.message }
+  await logAudit(supabase, 'update', adminEmail, id, input.full_name.trim())
+  return {}
 }
 
 export async function deleteProfile(id: string): Promise<{ error?: string }> {
-  await requireAdmin()
+  const adminEmail = await requireAdmin()
   const supabase = createServiceClient()
+
+  // Fetch name before deleting so we can log it
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', id)
+    .single()
+
   const { error } = await supabase.from('profiles').delete().eq('id', id)
-  return error ? { error: error.message } : {}
+  if (error) return { error: error.message }
+
+  await logAudit(supabase, 'delete', adminEmail, null, profile?.full_name ?? 'Unknown')
+  return {}
 }
 
 export async function listProfiles(page = 1, q = ''): Promise<{
@@ -352,6 +384,28 @@ export async function dismissEditRequest(id: string): Promise<{ error?: string }
   const supabase = createServiceClient()
   const { error } = await supabase.from('edit_requests').update({ status: 'reviewed' }).eq('id', id)
   return error ? { error: error.message } : {}
+}
+
+export async function listAuditLog(page = 1): Promise<{
+  entries: {
+    id: string
+    action: string
+    profile_name: string | null
+    performed_by: string | null
+    created_at: string
+  }[]
+  total: number
+}> {
+  await requireAdmin()
+  const supabase = createServiceClient()
+  const pageSize = 50
+  const offset = (page - 1) * pageSize
+  const { data, count } = await supabase
+    .from('audit_log')
+    .select('id, action, profile_name, performed_by, created_at', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(offset, offset + pageSize - 1)
+  return { entries: (data ?? []) as any, total: count ?? 0 }
 }
 
 export async function listImportBatches(page = 1): Promise<{
