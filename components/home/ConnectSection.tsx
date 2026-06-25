@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { findProfileByEmail, getTopMatches, submitEditRequest, type ConnectProfile } from '@/app/connect/actions'
+import { orgChipClasses } from '@/lib/orgs'
 
 type Step = 'email' | 'confirm' | 'edit-request' | 'matches'
 
@@ -20,7 +21,11 @@ function MiniCard({ profile }: { profile: ConnectProfile }) {
         </div>
       </div>
       {profile.organizations.length > 0 && (
-        <p className="text-xs font-medium text-blue-600 mb-1">{profile.organizations.slice(0, 2).join(', ')}</p>
+        <div className="flex flex-wrap gap-1 mb-1">
+          {profile.organizations.slice(0, 2).map((org) => (
+            <span key={org} className={`text-xs font-medium px-2 py-0.5 rounded-full ${orgChipClasses(org)}`}>{org}</span>
+          ))}
+        </div>
       )}
       {profile.bio && (
         <p className="text-xs text-gray-500 line-clamp-2 mb-2">{profile.bio}</p>

@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 import type { SearchParams, SearchResult, FilterOptions, Profile } from '@/lib/types'
+import { CANONICAL_ORGS } from '@/lib/orgs'
 
 const PAGE_SIZE = 20
 
@@ -89,7 +90,7 @@ export const getFilterOptions = unstable_cache(
     }
 
     return {
-      organizations: [...orgs].sort(),
+      organizations: [...CANONICAL_ORGS],
       roles: [...roles].sort(),
       skills: [...skills].sort(),
       interests: [...interests].sort(),

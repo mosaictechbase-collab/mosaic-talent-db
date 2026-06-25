@@ -1,4 +1,5 @@
 import type { Profile } from '@/lib/types'
+import { orgChipClasses } from '@/lib/orgs'
 
 interface Props {
   profile: Profile
@@ -23,9 +24,9 @@ export default function ProfileCard({ profile }: Props) {
       </div>
 
       {/* Org + location */}
-      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-2">
-        {profile.organizations.slice(0, 2).map((org) => (
-          <span key={org} className="text-xs font-medium text-blue-600">{org}</span>
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {profile.organizations.slice(0, 3).map((org) => (
+          <span key={org} className={`text-xs font-medium px-2 py-0.5 rounded-full ${orgChipClasses(org)}`}>{org}</span>
         ))}
         {profile.location && (
           <span className="flex items-center gap-0.5 text-xs text-gray-400">
