@@ -386,6 +386,29 @@ export async function dismissEditRequest(id: string): Promise<{ error?: string }
   return error ? { error: error.message } : {}
 }
 
+export async function deleteAllProfiles(): Promise<{ deleted: number; error?: string }> {
+  const adminEmail = await requireAdmin()
+  const supabase = createServiceClient()
+
+  const { count } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+
+  const { error } = await supabase.from('profiles').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  if (error) return { deleted: 0, error: error.message }
+
+  const deleted = count ?? 0
+  await supabase.from('audit_log').insert({
+    action: 'delete_all',
+    profile_id: null,
+    profile_name: `All profiles (${deleted.toLocaleString()} records)`,
+    performed_by: adminEmail,
+    metadata: { deleted_count: deleted },
+  })
+
+  return { deleted }
+}
+
 export async function listAuditLog(page = 1): Promise<{
   entries: {
     id: string
