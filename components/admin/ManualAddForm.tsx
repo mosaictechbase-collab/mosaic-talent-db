@@ -3,17 +3,14 @@
 import { useState } from 'react'
 import { addProfile, type ManualProfileInput } from '@/app/admin/actions'
 
+const COLLEGES = ['COE', 'Khoury', 'DMSB', 'Bouve', 'COS', 'CSSH', 'CAMD', 'Mills', 'CPS']
+
 const empty: ManualProfileInput = {
-  full_name: '', email: '', organizations: '', roles: '',
-  skills: '', interests: '', graduation_year: '', major: '',
-  location: '', bio: '', current_project: '', linkedin_url: '',
+  full_name: '', email: '', college: '', organizations: '',
+  skills: '', interests: '', graduation_year: '',
 }
 
-interface Props {
-  onAdded: () => void
-}
-
-export default function ManualAddForm({ onAdded }: Props) {
+export default function ManualAddForm({ onAdded }: { onAdded: () => void }) {
   const [form, setForm] = useState<ManualProfileInput>(empty)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,77 +26,54 @@ export default function ManualAddForm({ onAdded }: Props) {
     setLoading(true)
     setError(null)
     setSuccess(false)
-
     const result = await addProfile(form)
-    if (result.error) {
-      setError(result.error)
-    } else {
-      setSuccess(true)
-      setForm(empty)
-      onAdded()
-    }
+    if (result.error) setError(result.error)
+    else { setSuccess(true); setForm(empty); onAdded() }
     setLoading(false)
   }
 
-  const field = (
-    label: string,
-    key: keyof ManualProfileInput,
-    placeholder: string,
-    hint?: string,
-    required = false
-  ) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      <input
-        type="text"
-        value={form[key]}
-        onChange={(e) => set(key, e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      {hint && <p className="text-xs text-gray-400 mt-0.5">{hint}</p>}
-    </div>
-  )
+  const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {success && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-          Profile added successfully.
-        </div>
-      )}
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {success && <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">Profile added successfully.</div>}
+      {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
       <div className="grid grid-cols-2 gap-4">
-        {field('Full Name', 'full_name', 'Sarah Chen', undefined, true)}
-        {field('Email', 'email', 'sarah@example.com')}
-        {field('Organizations', 'organizations', 'Generate, IDEA', 'Comma-separated')}
-        {field('Roles', 'roles', 'Founder, Designer', 'Comma-separated')}
-        {field('Skills', 'skills', 'React, Figma, Python', 'Comma-separated')}
-        {field('Interests', 'interests', 'FinTech, Sustainability', 'Comma-separated')}
-        {field('Graduation Year', 'graduation_year', '2026')}
-        {field('Major', 'major', 'Computer Science')}
-        {field('Location', 'location', 'Boston, MA')}
-        {field('LinkedIn URL', 'linkedin_url', 'https://linkedin.com/in/...')}
-        {field('Currently Working On', 'current_project', 'Building a fintech app...')}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-        <textarea
-          value={form.bio}
-          onChange={(e) => set('bio', e.target.value)}
-          placeholder="Short description..."
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+          <input value={form.full_name} onChange={e => set('full_name', e.target.value)} placeholder="Sarah Chen" required className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="sarah@northeastern.edu" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">College</label>
+          <select value={form.college} onChange={e => set('college', e.target.value)} className={inputCls}>
+            <option value="">Select college…</option>
+            {COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Graduation Year</label>
+          <input value={form.graduation_year} onChange={e => set('graduation_year', e.target.value)} placeholder="2026" className={inputCls} />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Organizations</label>
+          <input value={form.organizations} onChange={e => set('organizations', e.target.value)} placeholder="Generate, Scout" className={inputCls} />
+          <p className="text-xs text-gray-400 mt-0.5">Comma-separated</p>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+          <input value={form.skills} onChange={e => set('skills', e.target.value)} placeholder="Python, React, Figma" className={inputCls} />
+          <p className="text-xs text-gray-400 mt-0.5">Comma-separated</p>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Interests</label>
+          <input value={form.interests} onChange={e => set('interests', e.target.value)} placeholder="FinTech, Sustainability" className={inputCls} />
+          <p className="text-xs text-gray-400 mt-0.5">Comma-separated</p>
+        </div>
       </div>
 
       <button

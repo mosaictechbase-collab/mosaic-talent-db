@@ -231,15 +231,13 @@ export default function AdminPage() {
             <p className="text-sm text-gray-600 mb-3">Your CSV file should include the following columns:</p>
             <ul className="text-sm text-gray-600 space-y-1.5">
               {[
-                ['name', 'Full name of the user'],
-                ['email', 'Email address'],
-                ['organization', 'Organization name (e.g., Generate, IDEA, Scout)'],
-                ['skills', 'Comma-separated list of skills'],
-                ['interests', 'Comma-separated list of interests'],
-                ['location', 'Location (e.g., Boston, MA)'],
-                ['bio', 'Short bio or description'],
-                ['grad year', 'Graduation year (e.g., 2025)'],
-                ['linkedin', 'LinkedIn profile URL'],
+                ['Full Name', 'Full name of the member'],
+                ['College', 'College at Northeastern (e.g., Khoury, COE, DMSB)'],
+                ['Email', 'Email address'],
+                ['Organizations', 'Comma-separated org names (e.g., Generate, Scout)'],
+                ['Skills', 'Comma-separated skills (e.g., Python, Figma)'],
+                ['Interests', 'Comma-separated interests (e.g., FinTech, AI)'],
+                ['Graduation Year', 'Graduation year (e.g., 2026)'],
               ].map(([col, desc]) => (
                 <li key={col}>
                   <span className="font-mono text-blue-700 text-xs bg-blue-50 px-1.5 py-0.5 rounded">{col}</span>

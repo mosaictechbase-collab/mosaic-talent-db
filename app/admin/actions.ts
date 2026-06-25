@@ -226,16 +226,11 @@ export async function importProfiles(formData: FormData): Promise<ImportResult> 
 export interface ManualProfileInput {
   full_name: string
   email: string
+  college: string
   organizations: string
-  roles: string
   skills: string
   interests: string
   graduation_year: string
-  major: string
-  location: string
-  bio: string
-  current_project: string
-  linkedin_url: string
 }
 
 async function logAudit(
@@ -265,16 +260,11 @@ export async function addProfile(input: ManualProfileInput): Promise<{ error?: s
   const { data, error } = await supabase.from('profiles').insert({
     full_name: input.full_name.trim(),
     email: input.email.trim().toLowerCase() || null,
+    college: input.college.trim() || null,
     organizations: split(input.organizations),
-    roles: split(input.roles),
     skills: split(input.skills),
     interests: split(input.interests),
     graduation_year: normalizeGradYear(input.graduation_year),
-    major: input.major.trim() || null,
-    location: input.location.trim() || null,
-    bio: input.bio.trim() || null,
-    current_project: input.current_project.trim() || null,
-    linkedin_url: input.linkedin_url.trim() || null,
     is_active: true,
   }).select('id').single()
 
@@ -293,16 +283,11 @@ export async function updateProfile(id: string, input: ManualProfileInput): Prom
   const { error } = await supabase.from('profiles').update({
     full_name: input.full_name.trim(),
     email: input.email.trim().toLowerCase() || null,
+    college: input.college.trim() || null,
     organizations: split(input.organizations),
-    roles: split(input.roles),
     skills: split(input.skills),
     interests: split(input.interests),
     graduation_year: normalizeGradYear(input.graduation_year),
-    major: input.major.trim() || null,
-    location: input.location.trim() || null,
-    bio: input.bio.trim() || null,
-    current_project: input.current_project.trim() || null,
-    linkedin_url: input.linkedin_url.trim() || null,
   }).eq('id', id)
 
   if (error) return { error: error.message }
@@ -330,10 +315,9 @@ export async function deleteProfile(id: string): Promise<{ error?: string }> {
 
 export async function listProfiles(page = 1, q = ''): Promise<{
   profiles: {
-    id: string; full_name: string; email: string | null
-    organizations: string[]; roles: string[]; skills: string[]; interests: string[]
-    graduation_year: number | null; major: string | null; location: string | null
-    bio: string | null; linkedin_url: string | null
+    id: string; full_name: string; email: string | null; college: string | null
+    organizations: string[]; skills: string[]; interests: string[]
+    graduation_year: number | null
   }[]
   total: number
 }> {
@@ -344,7 +328,7 @@ export async function listProfiles(page = 1, q = ''): Promise<{
 
   let query = supabase
     .from('profiles')
-    .select('id, full_name, email, organizations, roles, skills, interests, graduation_year, major, location, bio, current_project, linkedin_url', { count: 'exact' })
+    .select('id, full_name, email, college, organizations, skills, interests, graduation_year', { count: 'exact' })
     .order('full_name')
     .range(offset, offset + pageSize - 1)
 
