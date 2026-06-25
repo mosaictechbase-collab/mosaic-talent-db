@@ -47,14 +47,14 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
             <p className="text-xs text-gray-400 mb-2">{profile.college}</p>
           )}
 
-          {/* Skills */}
+          {/* Skills — subtle so they don't compete with orgs */}
           {profile.skills.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
               {profile.skills.slice(0, 3).map((skill) => (
-                <span key={skill} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">{skill}</span>
+                <span key={skill} className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full border border-gray-200">{skill}</span>
               ))}
               {profile.skills.length > 3 && (
-                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">+{profile.skills.length - 3}</span>
+                <span className="px-2 py-0.5 bg-gray-100 text-gray-400 text-xs rounded-full border border-gray-200">+{profile.skills.length - 3}</span>
               )}
             </div>
           )}
@@ -67,20 +67,30 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
             </div>
           )}
 
-          {/* Footer */}
-          <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-            {profile.interests.length > 0 ? (
-              <p className="text-xs text-gray-400 truncate pr-2">{profile.interests.slice(0, 2).join(', ')}</p>
-            ) : <span />}
-            <button
-              onClick={() => setFlipped(true)}
-              className="shrink-0 flex items-center gap-1 bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
-              Contact
-            </button>
+          {/* Interests + Contact */}
+          <div className="mt-auto pt-3 border-t border-gray-100">
+            {profile.interests.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-3">
+                <span className="text-xs text-gray-400 mr-0.5 self-center">Interests:</span>
+                {profile.interests.slice(0, 3).map((interest) => (
+                  <span key={interest} className="px-2 py-0.5 bg-slate-50 text-slate-600 text-xs rounded-full border border-slate-200">{interest}</span>
+                ))}
+                {profile.interests.length > 3 && (
+                  <span className="px-2 py-0.5 bg-slate-50 text-slate-400 text-xs rounded-full border border-slate-200">+{profile.interests.length - 3}</span>
+                )}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setFlipped(true)}
+                className="flex items-center gap-1 bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                </svg>
+                Contact
+              </button>
+            </div>
           </div>
         </div>
 
