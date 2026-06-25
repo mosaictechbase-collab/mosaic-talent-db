@@ -8,14 +8,14 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
   const [flipped, setFlipped] = useState(false)
 
   return (
-    <div className="h-full min-h-[260px]" style={{ perspective: '1000px' }}>
+    <div style={{ perspective: '1000px' }}>
       <div
-        className="relative h-full transition-transform duration-500"
+        className="relative transition-transform duration-500"
         style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
       >
-        {/* ── Front ── */}
+        {/* ── Front (drives height) ── */}
         <div
-          className="absolute inset-0 bg-white border border-gray-200 rounded-xl p-5 flex flex-col"
+          className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col"
           style={{ backfaceVisibility: 'hidden' }}
         >
           {/* Avatar + name */}
