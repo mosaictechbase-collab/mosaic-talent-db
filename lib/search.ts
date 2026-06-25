@@ -93,8 +93,20 @@ export const getFilterOptions = unstable_cache(
     return {
       organizations: [...CANONICAL_ORGS],
       roles: [...roles].sort(),
-      skills: [...skills].sort(),
-      interests: [...interests].sort(),
+      skills: [
+        'Python','JavaScript','React','Node.js','SQL','Machine Learning',
+        'Data Analysis','Figma','UI/UX Design','Product Management',
+        'Full-Stack Development','Mobile Development','Hardware Engineering',
+        'CAD / SolidWorks','Robotics','PCB Design','Embedded Systems',
+        'Marketing','Business Development','Public Speaking',
+      ],
+      interests: [
+        'Artificial Intelligence','Healthcare','Biotechnology','Robotics',
+        'Climate Tech','Sustainability','FinTech','Entrepreneurship',
+        'Venture Capital','Product Design','Education','Social Impact',
+        'Cybersecurity','Consumer Apps','Web3 / Blockchain','Quantum Computing',
+        'Medical Devices','Creator Economy','Space','Open Source',
+      ],
       graduationYears: [...years].sort((a, b) => b - a),
       colleges: ['COE', 'Khoury', 'DMSB', 'Bouve', 'COS', 'CSSH', 'CAMD', 'Mills', 'CPS'],
     }
