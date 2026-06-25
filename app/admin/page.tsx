@@ -8,6 +8,7 @@ import ProfileList from '@/components/admin/ProfileList'
 import EditRequests from '@/components/admin/EditRequests'
 import Analytics from '@/components/admin/Analytics'
 import { importProfiles } from './actions'
+import { createClient } from '@/lib/supabase/client'
 import type { ImportResult } from '@/lib/types'
 
 type Tab = 'upload' | 'add' | 'manage' | 'requests' | 'analytics'
@@ -135,7 +136,21 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Admin Panel</h1>
+      <div className="flex items-start justify-between mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+        <button
+          onClick={async () => {
+            await createClient().auth.signOut()
+            window.location.href = '/'
+          }}
+          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Log out
+        </button>
+      </div>
       <p className="text-gray-500 text-sm mb-6">
         Manage the Mosaic Talent Network
       </p>
