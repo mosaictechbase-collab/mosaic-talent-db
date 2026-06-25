@@ -107,9 +107,9 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
             <div className="mt-auto">
               <button
                 onClick={() => setFlipped(true)}
-                className="w-full py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold rounded-xl transition-colors tracking-wide"
+                className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-xl transition-colors tracking-wide"
               >
-                Get in touch →
+                Contact
               </button>
             </div>
           </div>
