@@ -4,18 +4,8 @@ import { useState } from 'react'
 import type { Profile } from '@/lib/types'
 import { orgChipClasses, ORG_COLORS } from '@/lib/orgs'
 
-const AVATAR_GRADIENTS = [
-  'from-blue-400 to-indigo-500',
-  'from-purple-400 to-pink-500',
-  'from-teal-400 to-cyan-500',
-  'from-orange-400 to-rose-500',
-  'from-green-400 to-emerald-500',
-  'from-violet-400 to-purple-500',
-]
-
-function avatarGradient(name: string) {
-  const i = name.charCodeAt(0) % AVATAR_GRADIENTS.length
-  return AVATAR_GRADIENTS[i]
+function avatarGradient(_name: string) {
+  return 'from-blue-500 to-blue-600'
 }
 
 function accentColor(orgs: string[]) {
