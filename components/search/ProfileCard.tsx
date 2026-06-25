@@ -126,7 +126,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
           <p className="font-bold text-gray-900 text-base mb-1">{profile.full_name}</p>
           {profile.organizations.length > 0 && (
             <div className="flex flex-wrap gap-1 justify-center mb-4">
-              {profile.organizations.slice(0, 2).map((org) => (
+              {profile.organizations.map((org) => (
                 <span key={org} className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${orgChipClasses(org)}`}>{org}</span>
               ))}
             </div>
