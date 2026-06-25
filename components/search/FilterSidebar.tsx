@@ -63,13 +63,13 @@ export default function FilterSidebar({ options }: Props) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const activeFilters = ['org', 'role', 'skill', 'interest', 'year'].filter((k) =>
+  const activeFilters = ['org', 'role', 'skill', 'interest', 'year', 'college'].filter((k) =>
     searchParams.get(k)
   )
 
   function clearAll() {
     const params = new URLSearchParams(searchParams.toString())
-    ;['org', 'role', 'skill', 'interest', 'year'].forEach((k) => params.delete(k))
+    ;['org', 'role', 'skill', 'interest', 'year', 'college'].forEach((k) => params.delete(k))
     params.delete('page')
     router.push(`${pathname}?${params.toString()}`)
   }
@@ -105,6 +105,12 @@ export default function FilterSidebar({ options }: Props) {
         items={options.interests}
         paramKey="interest"
         current={searchParams.get('interest')}
+      />
+      <FilterGroup
+        title="College"
+        items={options.colleges}
+        paramKey="college"
+        current={searchParams.get('college')}
       />
       <FilterGroup
         title="Graduation Year"

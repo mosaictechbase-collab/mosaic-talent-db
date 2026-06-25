@@ -30,6 +30,7 @@ export async function searchProfiles(params: SearchParams): Promise<SearchResult
   if (params.role) query = query.contains('roles', [params.role])
   if (params.skill) query = query.contains('skills', [params.skill])
   if (params.interest) query = query.contains('interests', [params.interest])
+  if (params.college) query = query.eq('college', params.college)
 
   if (params.year) {
     const year = parseInt(params.year, 10)
@@ -95,6 +96,7 @@ export const getFilterOptions = unstable_cache(
       skills: [...skills].sort(),
       interests: [...interests].sort(),
       graduationYears: [...years].sort((a, b) => b - a),
+      colleges: ['COE', 'Khoury', 'DMSB', 'Bouve', 'COS', 'CSSH', 'CAMD', 'Mills', 'CPS'],
     }
   },
   ['filter-options'],

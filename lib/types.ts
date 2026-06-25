@@ -38,6 +38,7 @@ export interface SearchParams {
   skill?: string
   interest?: string
   year?: string
+  college?: string
   page?: string
   pageSize?: string
 }
@@ -64,4 +65,5 @@ export interface FilterOptions {
   skills: string[]
   interests: string[]
   graduationYears: number[]
+  colleges: string[]
 }
