@@ -118,38 +118,7 @@ The Mosaic Talent Network solves this by providing a centralized platform where 
 
 ---
 
-# Project Structure
 
-```
-app/
-├── authentication
-├── admin dashboard
-├── API routes
-├── pages
-
-components/
-├── reusable UI components
-├── forms
-├── tables
-├── search
-
-lib/
-├── utilities
-├── database helpers
-├── AI integration
-├── CSV processing
-
-supabase/
-└── database migrations
-
-docs/
-└── project documentation
-
-public/
-└── static assets
-```
-
----
 
 # Engineering Challenges
 
